@@ -1,0 +1,28 @@
+---
+- hosts: all
+  remote_user: vagrant
+  sudo: yes
+  vars:
+    nodejs_version: "0.10.33"
+    nodejs_arch: "x64"
+    nodejs_target: "/usr/share"
+  tasks:
+  - name: check if package is updated
+    shell: /usr/bin/test -f /tmp/updated
+    register: is_updated
+    ignore_errors: True
+
+  - name: ensure package is updated
+    command: apt-get update -y
+    when: is_updated.rc == 1
+
+  - name: ensure Vim is installed
+    apt: pkg=vim state=latest
+
+  - name: install jdk
+    apt: pkg=openjdk-7-jdk state=installed
+
+  - include: playbooks/nodejs/tasks/setup.yml
+
+  - name: install phantomjs
+    npm: name=phantomjs global=yes
